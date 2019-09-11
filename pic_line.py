@@ -16,7 +16,7 @@ color_select= np.copy(image)
 line_image = np.copy(image)
 
 # Define our color criteria
-red_threshold = 10
+red_threshold = 150
 green_threshold = 10
 blue_threshold = 10
 rgb_threshold = [red_threshold, green_threshold, blue_threshold]
@@ -27,10 +27,10 @@ rgb_threshold = [red_threshold, green_threshold, blue_threshold]
 # But you'll get a chance to play with them soon in a quiz ;)
 left_bottom = [0,ysize]
 right_bottom = [xsize,ysize]
-apex = [xsize/5, ysize/5]
+apex = [xsize/2, ysize/2]
 
-fit_left = np.polyfit((left_bottom[0], apex[0]), (left_bottom[1], apex[1]), 1)
-fit_right = np.polyfit((right_bottom[0], apex[0]), (right_bottom[1], apex[1]), 1)
+fit_left = np.polyfit((left_bottom[0], apex[0]), (left_bottom[1], apex[1]),2)
+fit_right = np.polyfit((right_bottom[0], apex[0]), (right_bottom[1], apex[1]), 2)
 fit_bottom = np.polyfit((left_bottom[0], right_bottom[0]), (left_bottom[1], right_bottom[1]), 1)
     
 # Mask pixels below the threshold
