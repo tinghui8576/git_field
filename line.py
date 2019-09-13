@@ -4,41 +4,39 @@ import numpy as np
 import cv2
 
 # Read in the camera
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(0)
 # Read in the video
-#cap = cv2.VideoCapture('line_corner.mp4')
+cap = cv2.VideoCapture('line_corner.mp4')
 
 while(cap.isOpened()):
-	# Find OpenCV version
+	# Find fps
 	(major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
-
 	if int(major_ver)  < 3 :
 		fps = cap.get(cv2.cv.CV_CAP_PROP_FPS)
 	else :
 		fps = cap.get(cv2.CAP_PROP_FPS)
+	
+	# Find OpenCV version
 	ret, image = cap.read()
-	#image = mpimg.imread('field.png')
-    # Grab the x and y sizes and make two copies of the image
-    # With one copy we'll extract only the pixels that meet our selection,
-    # then we'll paint those pixels red in the original image to see our selection
-    # overlaid on the original.
-	ysize = image.shape[0]
-	xsize = image.shape[1]
+
+	# make two copies of the image
+	# With one copy we'll extract only the pixels that meet our selection,
+	# then we'll paint those pixels red in the original image to see our selection
+	# overlaid on the original.
 	color_select= np.copy(image)
 	line_image = np.copy(image)
 
 	# Define our color criteria
-	red_threshold = 200
-	green_threshold = 50
-	blue_threshold = 50
-	rgb_threshold = [blue_threshold, green_threshold, red_threshold]
+	HMi_threshold = 10
+	HMa_threshold = 156
+	S_threshold = 43
+	V_threshold = 46
+	HSV_threshold = [HMi_threshold, HMa_threshold, S_threshold, V_threshold]
  
    	# Mask pixels below the threshold
 	HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 	H, S, V = cv2.split(HSV)
-	color_thresholds = (image[:,:,0] < rgb_threshold[0]) | \
-			(image[:,:,1] < rgb_threshold[1]) | \
-			(image[:,:,2] < rgb_threshold[2]) | ((image[:,:,0] > 150) & (image[:,:,1] > 150) & (image[:,:,2] > 150))
+	color_thresholds = ((H > HSV_threshold[0]) & (H < HSV_threshold[1])) | (S < HSV_threshold[2]) | (V < HSV_threshold[3])
 	
     	# Mask color selection
 	color_select[color_thresholds] = [0,0,0]
