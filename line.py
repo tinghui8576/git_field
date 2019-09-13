@@ -9,6 +9,16 @@ import cv2
 cap = cv2.VideoCapture('line_corner.mp4')
 
 while(cap.isOpened()):
+	# Find OpenCV version
+	(major_ver, minor_ver, subminor_ver) = (cv2.__version__).split('.')
+
+	if int(major_ver)  < 3 :
+		fps = video.get(cv2.cv.CV_CAP_PROP_FPS)
+	else :
+		fps = video.get(cv2.CAP_PROP_FPS)
+	#版权声明：本文为CSDN博主「chenxp2311」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+	#原文链接：https://blog.csdn.net/u010167269/article/details/53303340
+
 	ret, image = cap.read()
 	#image = mpimg.imread('field.png')
     # Grab the x and y sizes and make two copies of the image
@@ -21,10 +31,10 @@ while(cap.isOpened()):
 	line_image = np.copy(image)
 
     # Define our color criteria
-	red_threshold = 90
+	red_threshold = 200
 	green_threshold = 50
 	blue_threshold = 50
-	rgb_threshold = [red_threshold, green_threshold, blue_threshold]
+	rgb_threshold = [blue_threshold, green_threshold, red_threshold]
     
 	# Define a triangle region of interest (Note: if you run this code,
 	# Keep in mind the origin (x=0, y=0) is in the upper left in image processing
@@ -41,14 +51,13 @@ while(cap.isOpened()):
    	# Mask pixels below the threshold
 	color_thresholds = (image[:,:,0] < rgb_threshold[0]) | \
 			(image[:,:,1] < rgb_threshold[1]) | \
-			(image[:,:,2] < rgb_threshold[2]) 
-			#((image[:,:,0] > 150) and (image[:,:,1] > 150) and (image[:,:,2] > 150))
+			(image[:,:,2] < rgb_threshold[2]) | ((image[:,:,0] > 150) & (image[:,:,1] > 150) & (image[:,:,2] > 150))
+	
 	# Find the region inside the lines
 	XX, YY = np.meshgrid(np.arange(0, xsize), np.arange(0, ysize))
 	region_thresholds = (YY > (XX*fit_left[0] + fit_left[1])) & \
 			(YY > (XX*fit_right[0] + fit_right[1])) & \
 			(YY < (XX*fit_bottom[0] + fit_bottom[1]))
-	#print(region_thresholds)
     	# Mask color selection
 	color_select[color_thresholds] = [0,0,0]
     	# Find where image is both colored right and in the region
@@ -58,7 +67,7 @@ while(cap.isOpened()):
 	cv2.imshow('frame',color_select)
 	cv2.imshow('frame',line_image)
 	
-	if cv2.waitKey(1) & 0xFF == ord('q'):
+	if cv2.waitKey(1/fps*1000) & 0xFF == ord('q'):
 		break
 
 cap.release()
