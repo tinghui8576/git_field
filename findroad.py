@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-cam = cv2.VideoCapture(1)
+cam = cv2.VideoCapture('line_circle1.mp4')
+#cam = cv2.VideoCapture(0)
 # 高斯滤波核大小
 blur_ksize = 5
 # Canny边缘检测高低阈值
@@ -10,7 +11,7 @@ canny_hth = 150
 rho = 1
 theta = np.pi / 180
 threshold = 15
-min_line_len = 40
+min_line_len = 5
 max_line_gap = 20
 
 try:
@@ -23,8 +24,8 @@ try:
         ed_rows, ed_cols = edges.shape
         # points = np.array([[(0, 0), (0, rows), (cols, rows), (cols, 0)]])
         rows = int(ed_rows/4)
-        cols = int(ed_cols/4.3)
-        cols2 = int(3*ed_cols/4.3)
+        cols = int(ed_cols/4.1)
+        cols2 = int(3*ed_cols/4.1)
         point1 = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
         point2 = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
         #point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
@@ -33,13 +34,13 @@ try:
         # [[[0 540], [460 325], [520 325], [960 540]]]
         roi_edges = roi_mask(edges, points)
         # 3. 霍夫直线提取
-        drawing, lines = hough_lines(roi_edges, rho, theta, threshold, min_line_len, max_line_gap)
-        # 4. 车道拟合计算
+        drawing, lines = hough_lines(roi_edges, rho, theta, threshold, min_line_len, max_line_gap)  
+        #     # 4. 车道拟合计算
         draw_lanes(drawing, lines)
         # 5. 最终将结果合在原图上
         result = cv2.addWeighted(img, 0.9, drawing, 0.2, 0)
-        #return result
-        return roi_edges
+        return result
+        #return roi_edges
 
     def roi_mask(img, corner_points):
         # 创建掩膜
@@ -53,10 +54,10 @@ try:
         lines = cv2.HoughLinesP(img, rho, theta, threshold, minLineLength=min_line_len, maxLineGap=max_line_gap)
         # 新建一副空白画布
         drawing = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-        # draw_lines(drawing, lines)     # 画出直线检测结果
+        #draw_lines(drawing, lines)     # 画出直线检测结果
         return drawing, lines
 
-    def draw_lines(img, lines, color=[0, 0, 255], thickness=1):
+    def draw_lines(img, lines, color=[255, 0, 0], thickness=5):
         for line in lines:
             for x1, y1, x2, y2 in line:
                 cv2.line(img, (x1, y1), (x2, y2), color, thickness)
@@ -64,6 +65,9 @@ try:
     def draw_lanes(img, lines, color=[255, 0, 0], thickness=8):
         # a. 划分左右车道
         left_lines, right_lines = [], []
+        # if(lines.all()):
+        #     print(lines.all())
+        #     return
         for line in lines:
             for x1, y1, x2, y2 in line:
                 k = (y2 - y1) / (x2 - x1)
