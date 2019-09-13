@@ -40,12 +40,13 @@ while(cap.isOpened()):
 	
     	# Mask color selection
 	color_select[color_thresholds] = [0,0,0]
+	color_select[~color_thresholds] = [255,255,255]
     	# Find where image is both colored right and in the region
 	line_image[~color_thresholds] = [255,0,0]
 
 	# Display our two output images
 	cv2.imshow('frame',color_select)
-	cv2.imshow('frame',line_image)
+	#cv2.imshow('frame',line_image)
 	
 	if cv2.waitKey(int(1.0/float(fps)*1000)) & 0xFF == ord('q'):
 		break
