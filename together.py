@@ -64,7 +64,7 @@ try:
         draw_lines(drawing, lines)     # 画出直线检测结果
         return drawing, lines
 
-    def draw_lines(img, lines, color=[255, 0, 0], thickness=50):
+    def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
         # if(lines.all()):
         #     return
         for line in lines:
@@ -99,23 +99,21 @@ while(cap.isOpened()):
 	S_threshold = 43
 	V_threshold = 46
 	HSV_threshold = [HMi_threshold, HMa_threshold, S_threshold, V_threshold]
- 
-   	# Mask pixels below the threshold
+    # Mask pixels below the threshold
 	HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 	H, S, V = cv2.split(HSV)
 	color_thresholds = ((H > HSV_threshold[0]) & (H < HSV_threshold[1])) | (S < HSV_threshold[2]) | (V < HSV_threshold[3])
-	
-    	# Mask color selection
+	# Mask color selection
 	color_select[color_thresholds] = [0,0,0]
 	color_select[~color_thresholds] = [255,255,255]
-    	# Find where image is both colored right and in the region
+    # Find where image is both colored right and in the region
 	line_image[~color_thresholds] = [255,0,0]
 
 
 	result = process_an_image(color_select)
 	# Display our two output images
 	cv2.imshow('frame',result)
-	#cv2.imshow('frame',line_image)
+	# cv2.imshow('origin',image)
 	
 	if cv2.waitKey(int(1.0/float(fps)*1000)) & 0xFF == ord('q'):
 		break
