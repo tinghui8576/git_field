@@ -19,7 +19,7 @@ max_line_gap = 50
 # Read in the camera
 #cap = cv2.VideoCapture(0)
 # Read in the video
-cap = cv2.VideoCapture('line_corner.mp4')
+cap = cv2.VideoCapture('line_str1.mp4')
 
 try:
     def process_an_image(img):
@@ -33,19 +33,30 @@ try:
         rows = int(ed_rows/4)
         cols = int(ed_cols/3.9)
         cols2 = int(3*ed_cols/3.9)
-        point1 = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
-        point2 = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
+        #seperate the points into left and right
+        point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
+        point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
         #point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
-        points = [point1, point2]
+        #points = [point1, point2]
         # points = np.array([[(0, rows), (460, 325), (520, 325), (cols, rows)]])
         # [[[0 540], [460 325], [520 325], [960 540]]]
-        roi_edges = roi_mask(blur_gray, points)
-        # 3. 霍夫直线提取
-        drawing, lines = hough_lines(roi_edges, rho, theta, threshold, min_line_len, max_line_gap)  
-        #     # 4. 车道拟合计算
+        #ROI in both left and right lanes
+        roi_edges_left = roi_mask(blur_gray, point_left)
+        roi_edges_right = roi_mask(blur_gray, point_right)
+        # 3. 霍夫直线提取in both left and right
+        drawing_left, lines_left, cen_left_x1, cen_left_x2, cen_left_y1, cen_left_y2 = hough_lines(roi_edges_left, rho, theta, threshold, min_line_len, max_line_gap)  
+        drawing_right, lines_right, cen_right_x1, cen_right_x2, cen_right_y1, cen_right_y2 = hough_lines(roi_edges_right, rho, theta, threshold, min_line_len, max_line_gap)
+        cen_x1 = (cen_left_x1 + cen_right_x1)/2
+        cen_x2 = (cen_left_x2 + cen_right_x2)/2
+        cen_y1 = (cen_left_y1 + cen_right_y1)/2
+        cen_y2 = (cen_left_y2 + cen_right_y2)/2
+	# 4. 车道拟合计算
         #draw_lanes(drawing, lines)
         # 5. 最终将结果合在原图上
-        result = cv2.addWeighted(img, 0.9, drawing, 0.2, 0)
+        #also let both right and left lanes put into one pic
+        drawing = cv2.addWeighted(drawing_left, 1, drawing_right, 1, 0)
+        cv2.line(drawing, (int(cen_x1), int(cen_y1)), (int(cen_x2), int(cen_y2)), (255,0,0),5)
+        result = cv2.addWeighted(img, 0.9, drawing, 0.7, 0)
         return result
         #return roi_edges
 
@@ -59,10 +70,14 @@ try:
     def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
         # 统计概率霍夫直线变换
         lines = cv2.HoughLinesP(img, rho, theta, threshold, minLineLength=min_line_len, maxLineGap=max_line_gap)
-        # 新建一副空白画布
+        cen_x1, cen_y1, cen_x2, cen_y2 = find_center(lines) 
+	# 新建一副空白画布
         drawing = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
         draw_lines(drawing, lines)     # 画出直线检测结果
-        return drawing, lines
+        #draw lane's center line
+        cv2.line(drawing, (int(cen_x1), int(cen_y1)), (int(cen_x2), int(cen_y2)), (255,0,0),5)
+        print(cen_x1, cen_x2, cen_y1, cen_y2)
+        return drawing, lines, cen_x1, cen_x2, cen_y1, cen_y2
 
     def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
         # if(lines.all()):
@@ -70,7 +85,31 @@ try:
         for line in lines:
             for x1, y1, x2, y2 in line:
                 cv2.line(img, (x1, y1), (x2, y2), color, thickness)
-		
+
+    # a function to find the center of the line
+    def find_center(lines):
+        #define the center points and the number of hough lines you have
+        center_x1 = 0
+        center_x2 = 0
+        center_y1 = 0
+        center_y2 = 0
+        count = 0
+
+        #add all the position in the hough lines and find out the center 
+        for line in lines:
+            for x1, y1 ,x2, y2 in line:
+                center_x1 = x1 + center_x1
+                center_x2 = x2 + center_x2
+                center_y1 = y1 + center_y1
+                center_y2 = y2 + center_y2
+            count =  count + 1        
+        center_x1 = center_x1 / count
+        center_x2 = center_x2 / count
+        center_y1 = center_y1 / count
+        center_y2 = center_y2 / count
+
+	#give the central line you calculate back
+        return center_x1, center_y1, center_x2, center_y2
 
 except (ValueError, ZeroDivisionError,TypeError):
         pass
@@ -113,7 +152,7 @@ while(cap.isOpened()):
 	result = process_an_image(color_select)
 	# Display our two output images
 	cv2.imshow('frame',result)
-	# cv2.imshow('origin',image)
+	#cv2.imshow('origin',image)
 	
 	if cv2.waitKey(int(1.0/float(fps)*1000)) & 0xFF == ord('q'):
 		break
