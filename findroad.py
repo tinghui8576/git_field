@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-# cam = cv2.VideoCapture('line_circle1.mp4')
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture('line_circle1.mp4')
+#cam = cv2.VideoCapture(0)
 # 高斯滤波核大小
 blur_ksize = 5
 # Canny边缘检测高低阈值
@@ -58,8 +58,8 @@ try:
         return drawing, lines
 
     def draw_lines(img, lines, color=[255, 0, 0], thickness=5):
-        if(lines.all()):
-            return
+        # if(lines.all()):
+        #     return
         for line in lines:
             for x1, y1, x2, y2 in line:
                 cv2.line(img, (x1, y1), (x2, y2), color, thickness)

@@ -65,8 +65,8 @@ try:
         return drawing, lines
 
     def draw_lines(img, lines, color=[255, 0, 0], thickness=50):
-        if(lines.all()):
-            return
+        # if(lines.all()):
+        #     return
         for line in lines:
             for x1, y1, x2, y2 in line:
                 cv2.line(img, (x1, y1), (x2, y2), color, thickness)
