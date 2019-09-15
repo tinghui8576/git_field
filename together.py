@@ -19,10 +19,10 @@ max_line_gap = 50
 # Read in the camera
 #cap = cv2.VideoCapture(0)
 # Read in the video
-cap = cv2.VideoCapture('line_str1.mp4')
+cap = cv2.VideoCapture('line_circle.mp4')
 
 try:
-    def process_an_image(img):
+    def process_an_image( img, weight):
         # 1. 灰度化、滤波和Canny
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray, (blur_ksize, blur_ksize), 1)
@@ -50,8 +50,8 @@ try:
         cen_x2 = (cen_left_x2 + cen_right_x2)/2
         cen_y1 = (cen_left_y1 + cen_right_y1)/2
         cen_y2 = (cen_left_y2 + cen_right_y2)/2
-	# 4. 车道拟合计算
-        #draw_lanes(drawing, lines)
+	#use the center point of the video and the central line of the path to control motor by sending message
+        message_from_video(weight, int(cen_x1))
         # 5. 最终将结果合在原图上
         #also let both right and left lanes put into one pic
         drawing = cv2.addWeighted(drawing_left, 1, drawing_right, 1, 0)
@@ -75,8 +75,6 @@ try:
         drawing = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
         draw_lines(drawing, lines)     # 画出直线检测结果
         #draw lane's center line
-        cv2.line(drawing, (int(cen_x1), int(cen_y1)), (int(cen_x2), int(cen_y2)), (255,0,0),5)
-        print(cen_x1, cen_x2, cen_y1, cen_y2)
         return drawing, lines, cen_x1, cen_x2, cen_y1, cen_y2
 
     def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
@@ -110,6 +108,18 @@ try:
 
 	#give the central line you calculate back
         return center_x1, center_y1, center_x2, center_y2
+    
+    #use video to send the message of where to go 
+    def message_from_video(weight, cen_x1):
+        #decide the direction by comparing the x direction between 
+	#the center point from video(weight/2) and one of the central point from central line of the path
+	#when the central point from line is smaller than center point means need to turn left, and so on  
+        if(int(weight/2) < cen_x1):
+            print("R")
+        elif(int(weight/2) > cen_x1):
+            print("L")
+        else :
+            print("S")
 
 except (ValueError, ZeroDivisionError,TypeError):
         pass
@@ -131,6 +141,7 @@ while(cap.isOpened()):
 	# overlaid on the original.
 	color_select= np.copy(image)
 	line_image = np.copy(image)
+	height, weight, channel =image.shape
 
 	# Define our color criteria
 	HMi_threshold = 10
@@ -149,7 +160,7 @@ while(cap.isOpened()):
 	line_image[~color_thresholds] = [255,0,0]
 
 
-	result = process_an_image(color_select)
+	result = process_an_image(color_select, weight)
 	# Display our two output images
 	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
