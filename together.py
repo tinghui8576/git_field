@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 # 高斯滤波核大小
-blur_ksize = 5
+blur_ksize = 15
 # Canny边缘检测高低阈值
 canny_lth = 50
 canny_hth = 150
@@ -19,33 +19,32 @@ max_line_gap = 50
 # Read in the camera
 #cap = cv2.VideoCapture(0)
 # Read in the video
-cap = cv2.VideoCapture('line_circle.mp4')
+cap = cv2.VideoCapture('right1.avi')
 
 try:
     def process_an_image( img, weight):
         # 1. 灰度化、滤波和Canny
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        blur_gray = cv2.GaussianBlur(gray, (blur_ksize, blur_ksize), 1)
         #edges = cv2.Canny(blur_gray, canny_lth, canny_hth)
         # 2. 标记四个坐标点用于ROI截取
-        ed_rows, ed_cols = blur_gray.shape
+        ed_rows, ed_cols = gray.shape
         # points = np.array([[(0, 0), (0, rows), (cols, rows), (cols, 0)]])
-        rows = int(ed_rows/4)
-        cols = int(ed_cols/3.9)
-        cols2 = int(3*ed_cols/3.9)
+        # rows = int(ed_rows/4)
+        # cols = int(ed_cols/3.9)
+        # cols2 = int(3*ed_cols/3.9)
         #seperate the points into left and right
-        point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
-        point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
+        # point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
+        # point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
         #point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
         #points = [point1, point2]
         # points = np.array([[(0, rows), (460, 325), (520, 325), (cols, rows)]])
         # [[[0 540], [460 325], [520 325], [960 540]]]
         #ROI in both left and right lanes
-        roi_edges_left = roi_mask(blur_gray, point_left)
-        roi_edges_right = roi_mask(blur_gray, point_right)
+        # roi_edges_left = roi_mask(blur_gray, point_left)
+        # roi_edges_right = roi_mask(blur_gray, point_right)
         # 3. 霍夫直线提取in both left and right
-        drawing_left, lines_left, cen_left_x1, cen_left_x2, cen_left_y1, cen_left_y2 = hough_lines(roi_edges_left, rho, theta, threshold, min_line_len, max_line_gap)  
-        drawing_right, lines_right, cen_right_x1, cen_right_x2, cen_right_y1, cen_right_y2 = hough_lines(roi_edges_right, rho, theta, threshold, min_line_len, max_line_gap)
+        drawing_left, lines_left, cen_left_x1, cen_left_x2, cen_left_y1, cen_left_y2 = hough_lines(gray, rho, theta, threshold, min_line_len, max_line_gap)  
+        drawing_right, lines_right, cen_right_x1, cen_right_x2, cen_right_y1, cen_right_y2 = hough_lines(gray, rho, theta, threshold, min_line_len, max_line_gap)
         cen_x1 = (cen_left_x1 + cen_right_x1)/2
         cen_x2 = (cen_left_x2 + cen_right_x2)/2
         cen_y1 = (cen_left_y1 + cen_right_y1)/2
@@ -70,6 +69,8 @@ try:
     def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
         # 统计概率霍夫直线变换
         lines = cv2.HoughLinesP(img, rho, theta, threshold, minLineLength=min_line_len, maxLineGap=max_line_gap)
+        if(lines is None):
+            return 0,0,0,0,0,0
         cen_x1, cen_y1, cen_x2, cen_y2 = find_center(lines) 
 	# 新建一副空白画布
         drawing = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
@@ -78,8 +79,6 @@ try:
         return drawing, lines, cen_x1, cen_x2, cen_y1, cen_y2
 
     def draw_lines(img, lines, color=[0, 255, 0], thickness=5):
-        # if(lines.all()):
-        #     return
         for line in lines:
             for x1, y1, x2, y2 in line:
                 cv2.line(img, (x1, y1), (x2, y2), color, thickness)
@@ -100,11 +99,11 @@ try:
                 center_x2 = x2 + center_x2
                 center_y1 = y1 + center_y1
                 center_y2 = y2 + center_y2
-            count =  count + 1        
-        center_x1 = center_x1 / count
-        center_x2 = center_x2 / count
-        center_y1 = center_y1 / count
-        center_y2 = center_y2 / count
+            count += 1        
+        center_x1 /= count
+        center_x2 /=  count
+        center_y1 /=  count
+        center_y2 /=  count
 
 	#give the central line you calculate back
         return center_x1, center_y1, center_x2, center_y2
@@ -133,7 +132,7 @@ while(cap.isOpened()):
 		fps = cap.get(cv2.CAP_PROP_FPS)
 	
 	# Find OpenCV version
-	ret, image = cap.read()
+	ret, image = cap.read();image = cv2.GaussianBlur(image, (blur_ksize, blur_ksize), 1)
 
 	# make two copies of the image
 	# With one copy we'll extract only the pixels that meet our selection,
@@ -141,8 +140,8 @@ while(cap.isOpened()):
 	# overlaid on the original.
 	color_select= np.copy(image)
 	line_image = np.copy(image)
-	height, weight, channel =image.shape
-
+	height, weight, channel = image.shape
+    
 	# Define our color criteria
 	HMi_threshold = 10
 	HMa_threshold = 156
