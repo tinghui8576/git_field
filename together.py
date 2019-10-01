@@ -2,6 +2,14 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
+import serial
+
+# 指定通訊埠名稱
+COM_PORT = 'COM3'
+# 設定傳輸速率
+BAUD_RATES = 9600    
+# 初始化序列通訊埠
+ser = serial.Serial(COM_PORT, BAUD_RATES)   
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -105,14 +113,16 @@ try:
         center_y1 /=  count
         center_y2 /=  count
 
-	#give the central line you calculate back
+	    #give the central line you calculate back
         return center_x1, center_y1, center_x2, center_y2
     
     #use video to send the message of where to go 
     def message_from_video(weight, cen_x1):
         #decide the direction by comparing the x direction between 
-	#the center point from video(weight/2) and one of the central point from central line of the path
-	#when the central point from line is smaller than center point means need to turn left, and so on  
+	    #the center point from video(weight/2) and one of the central point from central line of the path
+	    #when the central point from line is smaller than center point means need to turn left, and so on  
+        #ser.write(3*((int(weight/2) - cen_x1)))
+        ser.write(b'3*((int(weight/2) - cen_x1))')
         if(int(weight/2) < cen_x1):
             print("R")
         elif(int(weight/2) > cen_x1):
