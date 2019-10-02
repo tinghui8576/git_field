@@ -29,6 +29,8 @@ max_line_gap = 15
 # Read in the video
 cap = cv2.VideoCapture('right1.avi')
 
+cap.set(cv2.CAP_PROP_FPS, 30)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 3);
 try:
 	def process_an_image( img, weight):
 		# 1. 灰度化、滤波和Canny
@@ -132,13 +134,14 @@ try:
 except (ValueError, ZeroDivisionError,TypeError):
 		pass
 
-while(cap.isOpened()):
+#ret, image = cap.read()
+while(cap.isOpened()):	
 	# Find fps
 	fps = cap.get(cv2.CAP_PROP_FPS)
-	print('fps', fps)
-	
+	print('fps', fps)	
 	# Find OpenCV version
-	ret, image = cap.read();image = cv2.GaussianBlur(image, (blur_ksize, blur_ksize), 1)
+	ret, image = cap.read()
+	image = cv2.GaussianBlur(image, (blur_ksize, blur_ksize), 1)
 
 	# make two copies of the image
 	# With one copy we'll extract only the pixels that meet our selection,
@@ -164,13 +167,12 @@ while(cap.isOpened()):
 	# Find where image is both colored right and in the region
 	line_image[~color_thresholds] = [255,0,0]
 
-
 	result = process_an_image(color_select, weight)
 	# Display our two output images
 	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
-	
-	if cv2.waitKey(int(1.0/float(fps)*1000)) & 0xFF == ord('q'):
+
+	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
 		break
 
 cap.release()
