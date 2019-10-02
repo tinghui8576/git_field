@@ -9,7 +9,7 @@ COM_PORT = 'COM3'
 # 設定傳輸速率
 BAUD_RATES = 9600    
 # 初始化序列通訊埠
-ser = serial.Serial(COM_PORT, BAUD_RATES)   
+# ser = serial.Serial(COM_PORT, BAUD_RATES)   
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -20,8 +20,8 @@ canny_hth = 150
 rho = 1
 theta = np.pi / 180
 threshold = 1
-min_line_len = 1
-max_line_gap = 50
+min_line_len = 15
+max_line_gap = 15
 
 
 # Read in the camera
@@ -122,7 +122,7 @@ try:
 	    #the center point from video(weight/2) and one of the central point from central line of the path
 	    #when the central point from line is smaller than center point means need to turn left, and so on  
         #ser.write(3*((int(weight/2) - cen_x1)))
-        ser.write(b'3*((int(weight/2) - cen_x1))')
+        #ser.write(b'3*((int(weight/2) - cen_x1))')
         if(int(weight/2) < cen_x1):
             print("R")
         elif(int(weight/2) > cen_x1):
