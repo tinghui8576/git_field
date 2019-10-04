@@ -3,13 +3,15 @@ import matplotlib.image as mpimg
 import numpy as np
 import cv2
 import serial
+import time
+import struct
 
 # 指定通訊埠名稱
-COM_PORT = 'COM3'
+COM_PORT = 'COM4'
 # 設定傳輸速率
 BAUD_RATES = 9600    
 # 初始化序列通訊埠
-# ser = serial.Serial(COM_PORT, BAUD_RATES)   
+ser = serial.Serial(COM_PORT, BAUD_RATES)   
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -123,7 +125,23 @@ try:
 		#decide the direction by comparing the x direction between 
 		#the center point from video(weight/2) and one of the central point from central line of the path
 		#when the central point from line is smaller than center point means need to turn left, and so on  
-		#ser.write(b'3*((int(weight/2) - cen_x1))')
+		# ser.write(3*((int(weight/2) - cen_x1)))
+		print(((int(weight/2) - cen_x1)))
+		move = (int(weight/2) - cen_x1)
+
+		#this part need to improve
+
+		# if (move > 127):
+		# 	move = 127
+		# elif (move < -127):
+		# 	move = -127
+		# print(bytes([move]))
+		# ser.write(b'')
+		# time.sleep(1)
+		# while ser.in_waiting:
+		# 	mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
+		# 	print('控制板回應：', mcu_feedback)
+		# 	break
 		if(int(weight/2) < cen_x1):
 			print("R")
 		elif(int(weight/2) > cen_x1):
