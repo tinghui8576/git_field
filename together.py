@@ -11,7 +11,9 @@ COM_PORT = 'COM4'
 # 設定傳輸速率
 BAUD_RATES = 9600    
 # 初始化序列通訊埠
-ser = serial.Serial(COM_PORT, BAUD_RATES)   
+ser = serial.Serial(COM_PORT, BAUD_RATES)  
+# communication treshold 
+tre = 60 
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -129,25 +131,25 @@ try:
 		print(((int(weight/2) - cen_x1)))
 		move = (int(weight/2) - cen_x1)
 
-		#this part need to improve
-
-		# if (move > 127):
-		# 	move = 127
-		# elif (move < -127):
-		# 	move = -127
-		# print(bytes([move]))
-		# ser.write(b'')
-		# time.sleep(1)
+		if (move > 127):
+			move = 127
+		elif (move < -127):
+				move = -127
+		if ((move > tre) or (move < -tre)):
+			ser.write(str(move).encode('ascii'))
+			time.sleep(1)
+			# print(str(move).encode('ascii'))
 		# while ser.in_waiting:
-		# 	mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
-		# 	print('控制板回應：', mcu_feedback)
-		# 	break
-		if(int(weight/2) < cen_x1):
-			print("R")
-		elif(int(weight/2) > cen_x1):
-			print("L")
-		else :
-			print("S")
+		# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
+		# 		print('控制板回應：', mcu_feedback)
+		# 		break
+		
+		# if(int(weight/2) < cen_x1):
+		# 	print("R")
+		# elif(int(weight/2) > cen_x1):
+		# 	print("L")
+		# else :
+		# 	print("S")
 
 except (ValueError, ZeroDivisionError,TypeError):
 		pass
@@ -156,7 +158,7 @@ except (ValueError, ZeroDivisionError,TypeError):
 while(cap.isOpened()):	
 	# Find fps
 	fps = cap.get(cv2.CAP_PROP_FPS)
-	print('fps', fps)	
+	# print('fps', fps)	
 	# Find OpenCV version
 	ret, image = cap.read()
 	image = cv2.GaussianBlur(image, (blur_ksize, blur_ksize), 1)
