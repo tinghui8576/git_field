@@ -9,11 +9,11 @@ import struct
 # 指定通訊埠名稱
 COM_PORT = 'COM4'
 # 設定傳輸速率
-BAUD_RATES = 9600    
+BAUD_RATES = 9600
 # 初始化序列通訊埠
 ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 60 
+tre = 100 
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -134,7 +134,8 @@ try:
 		if (move > 127):
 			move = 127
 		elif (move < -127):
-				move = -127
+			move = -127
+		
 		if ((move > tre) or (move < -tre)):
 			ser.write(str(move).encode('ascii'))
 			time.sleep(1)
@@ -143,7 +144,7 @@ try:
 		# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
 		# 		print('控制板回應：', mcu_feedback)
 		# 		break
-		
+
 		# if(int(weight/2) < cen_x1):
 		# 	print("R")
 		# elif(int(weight/2) > cen_x1):
@@ -189,7 +190,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	cv2.imshow('frame',result)
+	#cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
