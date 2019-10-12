@@ -11,9 +11,9 @@ COM_PORT = 'COM4'
 # 設定傳輸速率
 BAUD_RATES = 9600
 # 初始化序列通訊埠
-ser = serial.Serial(COM_PORT, BAUD_RATES)  
+#ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 100 
+tre = 70
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -26,12 +26,15 @@ theta = np.pi / 180
 threshold = 1
 min_line_len = 15
 max_line_gap = 15
+cc = 0
+sm = 10
+smt = [0,0,0,0,0,0,0,0,0,0]
 
 
 # Read in the camera
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 # Read in the video
-cap = cv2.VideoCapture('right1.avi')
+#cap = cv2.VideoCapture('right1.avi')
 
 cap.set(cv2.CAP_PROP_FPS, 30)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 3);
@@ -128,29 +131,42 @@ try:
 		#the center point from video(weight/2) and one of the central point from central line of the path
 		#when the central point from line is smaller than center point means need to turn left, and so on  
 		# ser.write(3*((int(weight/2) - cen_x1)))
-		print(((int(weight/2) - cen_x1)))
+		
 		move = (int(weight/2) - cen_x1)
 
 		if (move > 127):
 			move = 127
 		elif (move < -127):
 			move = -127
+		smooth_deliver(move)
 		
-		if ((move > tre) or (move < -tre)):
-			ser.write(str(move).encode('ascii'))
-			time.sleep(1)
-			# print(str(move).encode('ascii'))
-		# while ser.in_waiting:
-		# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
-		# 		print('控制板回應：', mcu_feedback)
-		# 		break
-
 		# if(int(weight/2) < cen_x1):
 		# 	print("R")
 		# elif(int(weight/2) > cen_x1):
 		# 	print("L")
 		# else :
 		# 	print("S")
+
+	def smooth_deliver(move):
+		global cc, sm, smt
+		if(cc < sm):
+			smt[cc] = move
+			cc+=1
+		else:
+			k = 0
+			cc = 0
+			for i in range(sm):
+				k += smt[i]
+			k /= 10
+			print(k)
+			# if ((k > tre) or (k < -tre)):
+			# 	ser.write(str(move).encode('ascii'))
+				#time.sleep(0.001)
+				# print(str(move).encode('ascii'))
+			# while ser.in_waiting:
+			# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
+			# 		print('控制板回應：', mcu_feedback)
+			# 		break
 
 except (ValueError, ZeroDivisionError,TypeError):
 		pass
@@ -190,7 +206,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	#cv2.imshow('frame',result)
+	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
