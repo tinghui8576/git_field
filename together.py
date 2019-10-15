@@ -24,8 +24,11 @@ canny_hth = 150
 rho = 1
 theta = np.pi / 180
 threshold = 1
-min_line_len = 15
+min_line_len = 20
 max_line_gap = 15
+cc = 0
+sm = 5
+smt = [0,0,0,0,0,0,0,0,0,0]
 
 cc = 0
 sm = 5
@@ -33,7 +36,11 @@ smt = [0,0,0,0,0,0,0,0,0,0]
 
 
 # Read in the camera
+<<<<<<< HEAD
 cap = cv2.VideoCapture(1)
+=======
+cap = cv2.VideoCapture(0)
+>>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 # Read in the video
 #cap = cv2.VideoCapture('right1.avi')
 
@@ -132,13 +139,18 @@ try:
 		#the center point from video(weight/2) and one of the central point from central line of the path
 		#when the central point from line is smaller than center point means need to turn left, and so on  
 		# ser.write(3*((int(weight/2) - cen_x1)))
+<<<<<<< HEAD
 		#print(((int(weight/2) - cen_x1)))
+=======
+		
+>>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 		move = (int(weight/2) - cen_x1)
 
 		if (move > 127):
 			move = 127
 		elif (move < -127):
 			move = -127
+<<<<<<< HEAD
 		smooth_deliever(move)
 
 		#if ((move > tre) or (move < -tre)):
@@ -150,6 +162,10 @@ try:
 		# 		print('控制板回應：', mcu_feedback)
 		# 		break
 
+=======
+		smooth_deliver(move)
+		
+>>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 		# if(int(weight/2) < cen_x1):
 		# 	print("R")
 		# elif(int(weight/2) > cen_x1):
@@ -171,6 +187,27 @@ try:
                 print(k)
                 if ((k > tre) or (k < -tre)):
                     ser.write(str(k).encode('ascii'))
+
+	def smooth_deliver(move):
+		global cc, sm, smt
+		if(cc < sm):
+			smt[cc] = move
+			cc+=1
+		else:
+			k = 0
+			cc = 0
+			for i in range(sm):
+				k += smt[i]
+			k /= 10
+			k = int(k)
+			print(k)
+			if ((k > tre) or (k < -tre)):
+				ser.write(str(k).encode('ascii'))
+			# time.sleep(1)
+			# while ser.in_waiting:
+			# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
+			# 		print('控制板回應：', mcu_feedback)
+			# 		break
 
 except (ValueError, ZeroDivisionError,TypeError):
 		pass
@@ -210,7 +247,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	#cv2.imshow('frame',result)
+	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
