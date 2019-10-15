@@ -7,13 +7,13 @@ import time
 import struct
 
 # 指定通訊埠名稱
-COM_PORT = 'COM4'
+COM_PORT = '/dev/ttyACM0'
 # 設定傳輸速率
 BAUD_RATES = 9600
 # 初始化序列通訊埠
 ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 100 
+tre = 10
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -27,11 +27,15 @@ threshold = 1
 min_line_len = 15
 max_line_gap = 15
 
+cc = 0
+sm = 5
+smt = [0,0,0,0,0,0,0,0,0,0]
+
 
 # Read in the camera
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 # Read in the video
-cap = cv2.VideoCapture('right1.avi')
+#cap = cv2.VideoCapture('right1.avi')
 
 cap.set(cv2.CAP_PROP_FPS, 30)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 3);
@@ -46,7 +50,7 @@ try:
 		# rows = int(ed_rows/4)
 		# cols = int(ed_cols/3.9)
 		# cols2 = int(3*ed_cols/3.9)
-		#seperate the points into left and right
+        	#seperate the points into left and right
 		# point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
 		# point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
 		#point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
@@ -128,17 +132,18 @@ try:
 		#the center point from video(weight/2) and one of the central point from central line of the path
 		#when the central point from line is smaller than center point means need to turn left, and so on  
 		# ser.write(3*((int(weight/2) - cen_x1)))
-		print(((int(weight/2) - cen_x1)))
+		#print(((int(weight/2) - cen_x1)))
 		move = (int(weight/2) - cen_x1)
 
 		if (move > 127):
 			move = 127
 		elif (move < -127):
 			move = -127
-		
-		if ((move > tre) or (move < -tre)):
-			ser.write(str(move).encode('ascii'))
-			time.sleep(1)
+		smooth_deliever(move)
+
+		#if ((move > tre) or (move < -tre)):
+		#	ser.write(str(move).encode('ascii'))
+		#	time.sleep(1)
 			# print(str(move).encode('ascii'))
 		# while ser.in_waiting:
 		# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
@@ -151,6 +156,21 @@ try:
 		# 	print("L")
 		# else :
 		# 	print("S")
+        def smooth_deliever(move):
+            global cc, sm, smt
+            if(cc<sm):
+                smt[cc,=move]
+                cc+=1
+            else:
+                k = 0
+                cc = 0
+                for i in range(sm):
+                    k+=smt[i]
+                k /= sm
+                k = int(k)
+                print(k)
+                if ((k > tre) or (k < -tre)):
+                    ser.write(str(k).encode('ascii'))
 
 except (ValueError, ZeroDivisionError,TypeError):
 		pass
