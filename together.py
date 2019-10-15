@@ -13,7 +13,7 @@ BAUD_RATES = 9600
 # 初始化序列通訊埠
 ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 100
+tre = 10
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -27,7 +27,7 @@ threshold = 1
 min_line_len = 20
 max_line_gap = 15
 cc = 0
-sm = 10
+sm = 5
 smt = [0,0,0,0,0,0,0,0,0,0]
 
 
@@ -158,11 +158,11 @@ try:
 			for i in range(sm):
 				k += smt[i]
 			k /= 10
+			k = int(k)
 			print(k)
 			if ((k > tre) or (k < -tre)):
-				ser.write(str(110).encode('ascii'))
-				#time.sleep(0.001)
-				# print(str(move).encode('ascii'))
+				ser.write(str(k).encode('ascii'))
+			# time.sleep(1)
 			# while ser.in_waiting:
 			# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
 			# 		print('控制板回應：', mcu_feedback)
@@ -206,7 +206,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	#cv2.imshow('frame',result)
+	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
