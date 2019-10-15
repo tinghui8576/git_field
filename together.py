@@ -30,21 +30,15 @@ cc = 0
 sm = 5
 smt = [0,0,0,0,0,0,0,0,0,0]
 
-cc = 0
-sm = 5
-smt = [0,0,0,0,0,0,0,0,0,0]
-
 
 # Read in the camera
-<<<<<<< HEAD
 cap = cv2.VideoCapture(1)
-=======
-cap = cv2.VideoCapture(0)
->>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 # Read in the video
 #cap = cv2.VideoCapture('right1.avi')
 
-cap.set(cv2.CAP_PROP_FPS, 30)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 490)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 230)
+#cap.set(cv2.CAP_PROP_FPS, 30)
 cap.set(cv2.CAP_PROP_BUFFERSIZE, 3);
 try:
 	def process_an_image( img, weight):
@@ -57,7 +51,7 @@ try:
 		# rows = int(ed_rows/4)
 		# cols = int(ed_cols/3.9)
 		# cols2 = int(3*ed_cols/3.9)
-        	#seperate the points into left and right
+		#seperate the points into left and right
 		# point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
 		# point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
 		#point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
@@ -139,54 +133,21 @@ try:
 		#the center point from video(weight/2) and one of the central point from central line of the path
 		#when the central point from line is smaller than center point means need to turn left, and so on  
 		# ser.write(3*((int(weight/2) - cen_x1)))
-<<<<<<< HEAD
-		#print(((int(weight/2) - cen_x1)))
-=======
 		
->>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 		move = (int(weight/2) - cen_x1)
 
 		if (move > 127):
 			move = 127
 		elif (move < -127):
 			move = -127
-<<<<<<< HEAD
-		smooth_deliever(move)
-
-		#if ((move > tre) or (move < -tre)):
-		#	ser.write(str(move).encode('ascii'))
-		#	time.sleep(1)
-			# print(str(move).encode('ascii'))
-		# while ser.in_waiting:
-		# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
-		# 		print('控制板回應：', mcu_feedback)
-		# 		break
-
-=======
 		smooth_deliver(move)
 		
->>>>>>> 9948e256bc058f446e97c649f2268ffd6ba72ad9
 		# if(int(weight/2) < cen_x1):
 		# 	print("R")
 		# elif(int(weight/2) > cen_x1):
 		# 	print("L")
 		# else :
 		# 	print("S")
-        def smooth_deliever(move):
-            global cc, sm, smt
-            if(cc<sm):
-                smt[cc,=move]
-                cc+=1
-            else:
-                k = 0
-                cc = 0
-                for i in range(sm):
-                    k+=smt[i]
-                k /= sm
-                k = int(k)
-                print(k)
-                if ((k > tre) or (k < -tre)):
-                    ser.write(str(k).encode('ascii'))
 
 	def smooth_deliver(move):
 		global cc, sm, smt
@@ -198,7 +159,7 @@ try:
 			cc = 0
 			for i in range(sm):
 				k += smt[i]
-			k /= 10
+			k /= sm
 			k = int(k)
 			print(k)
 			if ((k > tre) or (k < -tre)):
@@ -247,10 +208,10 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	cv2.imshow('frame',result)
+	#cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
-	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
+	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
 
 cap.release()
