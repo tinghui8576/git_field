@@ -157,7 +157,7 @@ try:
 			cc = 0
 			for i in range(sm):
 				k += smt[i]
-			k /= 10
+			k /= sm
 			k = int(k)
 			print(k)
 			if ((k > tre) or (k < -tre)):
