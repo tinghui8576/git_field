@@ -11,9 +11,9 @@ COM_PORT = 'COM4'
 # 設定傳輸速率
 BAUD_RATES = 9600
 # 初始化序列通訊埠
-#ser = serial.Serial(COM_PORT, BAUD_RATES)  
+ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 70
+tre = 100
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -24,7 +24,7 @@ canny_hth = 150
 rho = 1
 theta = np.pi / 180
 threshold = 1
-min_line_len = 15
+min_line_len = 20
 max_line_gap = 15
 cc = 0
 sm = 10
@@ -159,8 +159,8 @@ try:
 				k += smt[i]
 			k /= 10
 			print(k)
-			# if ((k > tre) or (k < -tre)):
-			# 	ser.write(str(move).encode('ascii'))
+			if ((k > tre) or (k < -tre)):
+				ser.write(str(110).encode('ascii'))
 				#time.sleep(0.001)
 				# print(str(move).encode('ascii'))
 			# while ser.in_waiting:
@@ -206,7 +206,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	cv2.imshow('frame',result)
+	#cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):

@@ -19,12 +19,13 @@ void loop() {
 
   if (Serial.available()) {
     Serial.readBytes(rec, 10);
+    Serial.setTimeout(50);
     x = atoi(rec);
     previoustime = millis();
   }
   else p = x;
 
-  if (currenttime - previoustime >= 1000) {
+  if (currenttime - previoustime >= 500) {
     if (x == p) {
       x = 0;
     }
@@ -42,9 +43,9 @@ void loop() {
 
 }
 void forward() {
-  analogWrite(rightf, 100);
+  analogWrite(rightf, 150);
   analogWrite(rightback, 0);
-  analogWrite(leftf, 100);
+  analogWrite(leftf, 150);
   analogWrite(leftback, 0);
 }
 void back() {
@@ -55,13 +56,13 @@ void back() {
 }
 void right(int a) {
   analogWrite(rightf, 0);
-  analogWrite(rightback, a); //0.3
-  analogWrite(leftf, a); //a
+  analogWrite(rightback, a + 30); //0.3
+  analogWrite(leftf, a + 50); //a
   analogWrite(leftback, 0);
 }
 void left(int a) {
-  analogWrite(rightf, a); //a
+  analogWrite(rightf, a + 50); //a
   analogWrite(rightback, 0);
   analogWrite(leftf, 0);
-  analogWrite(leftback, a); //0.3
+  analogWrite(leftback, a + 30); //0.3
 }
