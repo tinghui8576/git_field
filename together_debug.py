@@ -13,7 +13,7 @@ BAUD_RATES = 9600
 # 初始化序列通訊埠
 ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 30
+tre = 10
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -47,20 +47,6 @@ try:
 		#edges = cv2.Canny(blur_gray, canny_lth, canny_hth)
 		# 2. 标记四个坐标点用于ROI截取
 		ed_rows, ed_cols = gray.shape
-		# points = np.array([[(0, 0), (0, rows), (cols, rows), (cols, 0)]])
-		# rows = int(ed_rows/4)
-		# cols = int(ed_cols/3.9)
-		# cols2 = int(3*ed_cols/3.9)
-		#seperate the points into left and right
-		# point_left = np.array([[(0, rows), (0, ed_rows), (cols, ed_rows), (cols, rows)]])
-		# point_right = np.array([[(ed_cols, rows), (ed_cols, ed_rows), (cols2, ed_rows), (cols2, rows)]])
-		#point3 = np.array([[(0, 120), (0, rows), (150, rows), (150, 120)]])
-		#points = [point1, point2]
-		# points = np.array([[(0, rows), (460, 325), (520, 325), (cols, rows)]])
-		# [[[0 540], [460 325], [520 325], [960 540]]]
-		#ROI in both left and right lanes
-		# roi_edges_left = roi_mask(blur_gray, point_left)
-		# roi_edges_right = roi_mask(blur_gray, point_right)
 		# 3. 霍夫直线提取in both left and right
 		drawing_left, lines_left, cen_left_x1, cen_left_x2, cen_left_y1, cen_left_y2 = hough_lines(gray, rho, theta, threshold, min_line_len, max_line_gap)  
 		drawing_right, lines_right, cen_right_x1, cen_right_x2, cen_right_y1, cen_right_y2 = hough_lines(gray, rho, theta, threshold, min_line_len, max_line_gap)
@@ -74,16 +60,7 @@ try:
 		#also let both right and left lanes put into one pic
 		drawing = cv2.addWeighted(drawing_left, 1, drawing_right, 1, 0)
 		cv2.line(drawing, (int(cen_x1), int(cen_y1)), (int(cen_x2), int(cen_y2)), (255,0,0),5)
-		result = cv2.addWeighted(img, 0.9, drawing, 0.7, 0)
-		return result
 		#return roi_edges
-
-	def roi_mask(img, corner_points):
-		# 创建掩膜
-		mask = np.zeros_like(img)
-		cv2.fillPoly(mask, corner_points, 255)
-		masked_img = cv2.bitwise_and(img, mask)
-		return masked_img
 
 	def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
 		# 统计概率霍夫直线变换
@@ -134,7 +111,7 @@ try:
 		#when the central point from line is smaller than center point means need to turn left, and so on  
 		# ser.write(3*((int(weight/2) - cen_x1)))
 		
-		move = (int(weight/2) - cen_x1)
+		move = (int(weight/2+weight/8) - cen_x1)
 
 		if (move > 127):
 			move = 127
@@ -159,7 +136,7 @@ try:
 			cc = 0
 			for i in range(sm):
 				k += smt[i]
-			k /= 10
+			k /= sm
 			k = int(k)
 			print(k)
 			if ((k > tre) or (k < -tre)):
@@ -206,7 +183,7 @@ while(cap.isOpened()):
 	# Find where image is both colored right and in the region
 	line_image[~color_thresholds] = [255,0,0]
 
-	result = process_an_image(color_select, weight)
+	process_an_image(color_select, weight)
 	# Display our two output images
 	#cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
