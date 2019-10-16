@@ -61,8 +61,8 @@ void right(int a) {
   analogWrite(leftback, 0);
 }
 void left(int a) {
-  analogWrite(rightf, 50 ); //a
+  analogWrite(rightf, 65); //a
   analogWrite(rightback, 0);
   analogWrite(leftf, 0);
-  analogWrite(leftback, 30 ); //0.3
+  analogWrite(leftback, 45); //0.3
 }

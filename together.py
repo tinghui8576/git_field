@@ -13,7 +13,7 @@ BAUD_RATES = 9600
 # 初始化序列通訊埠
 ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
-tre = 10
+tre = 30
 
 # 高斯滤波核大小
 blur_ksize = 15
@@ -157,7 +157,7 @@ try:
 			cc = 0
 			for i in range(sm):
 				k += smt[i]
-			k /= sm
+			k /= 10
 			k = int(k)
 			print(k)
 			if ((k > tre) or (k < -tre)):
@@ -206,7 +206,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	cv2.imshow('frame',result)
+	#cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(int(1000/fps)) & 0xFF == ord('q'):
