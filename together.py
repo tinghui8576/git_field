@@ -7,11 +7,11 @@ import time
 import struct
 
 # 指定通訊埠名稱
-COM_PORT = '/dev/ttyACM0'
+COM_PORT = 'COM4'
 # 設定傳輸速率
 BAUD_RATES = 9600
 # 初始化序列通訊埠
-ser = serial.Serial(COM_PORT, BAUD_RATES)  
+# ser = serial.Serial(COM_PORT, BAUD_RATES)  
 # communication treshold 
 tre = 30
 
@@ -32,7 +32,7 @@ smt = [0,0,0,0,0,0,0,0,0,0]
 
 
 # Read in the camera
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 # Read in the video
 #cap = cv2.VideoCapture('right1.avi')
 
@@ -162,8 +162,8 @@ try:
 			k /= 10
 			k = int(k)
 			print(k)
-			if ((k > tre) or (k < -tre)):
-				ser.write(str(k).encode('ascii'))
+			# if ((k > tre) or (k < -tre)):
+			# 	ser.write(str(k).encode('ascii'))
 			# time.sleep(1)
 			# while ser.in_waiting:
 			# 		mcu_feedback = ser.readline().decode()  # 接收回應訊息並解碼
@@ -208,7 +208,7 @@ while(cap.isOpened()):
 
 	result = process_an_image(color_select, weight)
 	# Display our two output images
-	#cv2.imshow('frame',result)
+	cv2.imshow('frame',result)
 	#cv2.imshow('origin',image)
 
 	if cv2.waitKey(1) & 0xFF == ord('q'):

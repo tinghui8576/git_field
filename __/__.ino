@@ -25,7 +25,7 @@ void loop() {
   }
   else p = x;
 
-  if (currenttime - previoustime >= 300) {
+  if (currenttime - previoustime >= 350) {
     if (x == p) {
       x = 0;
     }
@@ -56,13 +56,13 @@ void back() {
 }
 void right(int a) {
   analogWrite(rightf, 0);
-  analogWrite(rightback, a + 30); //0.3
-  analogWrite(leftf, a + 50); //a
+  analogWrite(rightback, a  ); //0.3
+  analogWrite(leftf,15 + a ); //a
   analogWrite(leftback, 0);
 }
 void left(int a) {
   analogWrite(rightf, 65); //a
   analogWrite(rightback, 0);
   analogWrite(leftf, 0);
-  analogWrite(leftback, 45); //0.3
+  analogWrite(leftback, 50); //0.3
 }
